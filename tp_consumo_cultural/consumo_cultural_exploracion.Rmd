@@ -1,0 +1,149 @@
+---
+title: 'Exploraciones sobre la Encuesta de consumos culturales'
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r}
+library(tidyverse)
+library(arules)
+```
+
+Lectura de los datos de la encuesta
+
+```{r}
+encuesta <- read.csv('/Users/javierspina/Documents/jspina/ecyt-introcsdatos/tp_consumo_cultural/encc_2017_pars.csv')
+head(encuesta)
+```
+
+Adecuación de los datos
+
+```{r}
+encuesta$X <- NULL
+encuesta <- encuesta[-c(1950, 2740),]
+```
+
+
+Agregamos rango etario
+```{r}
+encuesta <- encuesta %>% mutate(rango_etario = case_when(
+  edad <= 20 ~ 'Entre 13 y 20',
+  edad <= 28 ~ 'Entre 21 y 28',
+  edad <= 36 ~ 'Entre 29 y 36',
+  edad <= 44 ~ 'Entre 37 y 44',
+  edad <= 52 ~ 'Entre 45 y 52',
+  edad <= 60 ~ 'Entre 53 y 60',
+  edad <= 68 ~ 'Entre 61 y 68',
+  edad <= 76 ~ 'Entre 69 y 76',
+  edad <= 84 ~ 'Entre 77 y 84',
+  edad > 84 ~ '85 o más',
+  TRUE ~ NA_character_
+))
+```
+
+
+Crear primera versión más chica del dataset
+
+```{r}
+encuesta_corta_1 <- select(encuesta, id, pondera_dem, region, sexo, rango_etario, escucha_radio, escucha_radio_online, escucha_musica, musica_desde_internet, concurre_recitales, practica_musica, lee_diarios, lee_revistas, lee_libros, miro_tv, concurre_cine, concurre_teatro, usa_internet, usa_aplicaciones, tiene_facebook, tiene_instagram, tiene_twitter, tiene_snapchat, tiene_linkedin, juega_videojuegos, NSEcat1)
+
+encuesta_corta_1$id <- as.integer(encuesta_corta_1$id)
+encuesta_corta_1$pondera_dem <- as.integer(encuesta_corta_1$pondera_dem)
+encuesta_corta_1[sapply(encuesta_corta_1, is.character)] = lapply(encuesta_corta_1[sapply(encuesta_corta_1, is.character)], as.factor)
+```
+
+Reglas de asociación para la primera versión de la encuesta corta
+
+```{r}
+rules_1 <- apriori(encuesta_corta_1, parameter = c(minlen=3, confidence=0.7))
+summary(rules_1)
+```
+
+Vemos de esta primera versión, las asociaciones que tienen más valor de confianza
+
+```{r}
+inspect(sort(rules_1, by='confidence', decreasing = T)[1:5])
+```
+
+Podríamos elegir una versión corta que evite id y otros campos que parecen hacer ruido, como el usa_aplicaciones que es redundante con los tiene\_<aplicacion>. Se deja edad, región y NSEcat1 que es el nivel socio-económico.
+
+```{r}
+encuesta_corta_2 <- select(encuesta, region, sexo, rango_etario, escucha_radio, escucha_musica, concurre_recitales, lee_diarios, lee_revistas, lee_libros, miro_tv, concurre_cine, concurre_teatro, usa_internet, juega_videojuegos, concurre_boliches, concurre_museo, NSEcat1)
+
+encuesta_corta_2[sapply(encuesta_corta_2, is.character)] = lapply(encuesta_corta_2[sapply(encuesta_corta_2, is.character)], as.factor)
+```
+
+Reglas de asociación para la primera versión de la encuesta corta
+
+```{r}
+rules_2 <- apriori(encuesta_corta_2, parameter = c(minlen=3, confidence=0.6, support=0.07))
+summary(rules_2)
+```
+
+Veamos las asociaciones que tienen más valor de confianza
+
+```{r}
+inspect(sort(rules_2, by='confidence', decreasing = T)[1:5])
+```
+
+Tienen confianza igual a 1, pero el lift es muy bajo. Si se ordena por lift...
+
+```{r}
+inspect(sort(rules_2, by='lift', decreasing = T)[1:10])
+```
+
+A ver por support...
+
+```{r}
+inspect(sort(rules_2, by='support', decreasing = T)[1:5])
+```
+
+La tercera, {escucha_musica=SI, miro_tv=SI} =\> {concurre_teatro=NO} parece resumir a la primera {escucha_musica=SI, concurre_teatro=NO} =\> {miro_tv=SI} y la segunda {miro_tv=SI, concurre_teatro=NO} =\> {escucha_musica=SI}
+
+```{r}
+encuesta %>% 
+  filter(escucha_musica=='SI' & miro_tv=='SI' & NSEcat1 != '') %>% 
+  group_by(NSEcat1, concurre_teatro) %>% 
+  mutate(cantidad = n()) %>% 
+  ggplot() +
+  geom_col(aes(x=cantidad, y=NSEcat1, fill=concurre_teatro), position='fill') +
+  labs(title='Asistencia al teatro de personas que escucharon música y miraron TV', subtitle='AB es la clase más alta, E es la clase más baja')
+
+encuesta %>% 
+  filter(escucha_musica=='SI' & miro_tv=='SI' & NSEcat1 != '') %>% 
+  group_by(rango_etario, concurre_teatro) %>% 
+  mutate(cantidad = n()) %>% 
+  ggplot() +
+  geom_col(aes(x=cantidad, y=rango_etario, fill=concurre_teatro), position='fill') +
+  labs(title='Asistencia al teatro de personas que escucharon música y miraron TV')
+```
+
+```{r}
+encuesta$pondera_dem <- as.integer(encuesta$pondera_dem)
+
+encuesta_ns <- encuesta %>% 
+  filter(NSEcat1 != '') %>% 
+  group_by(rango_etario, NSEcat1, region) %>% 
+  summarise(n_total = n(),
+            n_hab = sum(pondera_dem),
+            n_escucha_radio = sum(escucha_radio=='SI')/n_total,
+            n_escucha_musica = sum(escucha_musica=='SI')/n_total,
+            n_concurre_recitales = sum(concurre_recitales=='SI')/n_total,
+            n_lee_diarios = sum(lee_diarios=='SI')/n_total,
+            n_lee_revistas = sum(lee_revistas=='SI')/n_total,
+            n_lee_libros = sum(lee_libros=='SI')/n_total,
+            n_miro_tv = sum(miro_tv=='SI')/n_total,
+            n_concurre_cine = sum(concurre_cine=='SI')/n_total,
+            n_concurre_teatro = sum(concurre_teatro=='SI')/n_total,
+            n_usa_internet = sum(usa_internet=='SI')/n_total,
+            n_juega_videojuegos = sum(juega_videojuegos=='SI')/n_total,
+            n_concurre_boliches = sum(concurre_boliches=='SI')/n_total,
+            n_concurre_museo = sum(concurre_museo=='SI')/n_total)
+
+```
+
+
+
+

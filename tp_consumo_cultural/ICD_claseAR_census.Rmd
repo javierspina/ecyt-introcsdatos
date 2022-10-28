@@ -1,0 +1,72 @@
+---
+title: "Reglas de asociación"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(arules)
+```
+
+Leo los datos del censo adulto
+```{r}
+df <- readxl::read_xlsx('/Users/rodrigo/Documents/Teaching/ICD/datasets/dataset_guía_2_adult_census.xlsx')
+```
+
+```{r}
+head(df)
+```
+
+Me quedo con las columnas que me interesan
+```{r}
+df <- df %>% 
+  select(-age, -native.country, -hours.per.week, -education.num, -relationship)
+```
+
+```{r}
+df
+```
+
+Para que funcione la función `apriori`, necesitamos pasar las columnas a factores
+```{r}
+# Convertir a factor
+df[sapply(df, is.character)] = lapply(df[sapply(df, is.character)], as.factor)
+```
+
+Aplicamos Apriori 
+```{r}
+rules <- arules::apriori(df, 
+                         parameter = c(minlen=3, confidence=0.7))
+summary(rules)
+```
+
+
+```{r}
+inspect(sort(rules, by='confidence', decreasing = T)[1:10])
+```
+
+
+inspect(sort(rules[!is.redundant(rules, measure='confidence')], by='confidence', decreasing = T)[1:10])
+
+## Reglas Maximales
+
+Son las reglas que  solo tienen conjuntos maximales, es decir que los itemsets no son subconjuntos de otros, se llaman reglas maximales.
+```{r}
+# Maximal rules
+max_rules <- rules[is.maximal(rules)]
+inspect(sort(max_rules, by='confidence', decreasing = T)[1:10])
+```
+
+
+<!-- inspect(sort(rules[!is.redundant(rules, 'support')], by='confidence', decreasing = T)[1:10]) -->
+
+## Redundantes
+```{r}
+nonred <- rules[!is.redundant(rules, 'support')]
+inspect(subset(x=nonred, subset = rhs %in% c('race=Black')))
+```
+       

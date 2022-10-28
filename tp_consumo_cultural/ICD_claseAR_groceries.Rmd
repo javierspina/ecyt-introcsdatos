@@ -1,0 +1,116 @@
+---
+title: "Reglas de Asociación - Groceries"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+fuente: https://www.cienciadedatos.net/documentos/43_reglas_de_asociacion
+---
+
+```{r}
+library(tidyverse)
+library(arules)
+```
+
+## Datos
+
+```{r}
+data("Groceries")
+```
+
+El formato del dataset no es el que estamos acostumbrados
+
+```{r}
+Groceries
+```
+
+Se trata de una matriz esparsa; podemos verla explícitamente con la función `inspect`, pero no es muy útil.
+
+```{r}
+inspect(Groceries[1:10])
+```
+
+El tamaño de cada transacción puede obtenerse con `size`:
+
+```{r}
+size(Groceries[1:10])
+```
+
+Podemos ver la distribución de los tamaños de las cestas de compra
+
+```{r}
+sizes <- size(Groceries)
+
+data.frame(sizes) %>%
+  ggplot(aes(x = sizes)) +
+  geom_histogram() +
+  labs(title = "Distribución del tamaño de las transacciones",
+       x = "Tamaño") +
+  theme_bw()
+```
+
+Podemos también ver todos los productos que se venden.
+
+```{r}
+colnames(Groceries)
+```
+
+Y la frecuencia
+
+```{r}
+frecuencia_items <- itemFrequency(x = Groceries, type = "relative")
+frecuencia_items %>% 
+  sort(decreasing = TRUE) %>% 
+  head(5)
+```
+
+## Items
+
+```{r}
+soporte <- 30 / dim(Groceries)[1]
+
+itemsets <- apriori(data = Groceries,
+                    parameter = list(support = soporte,
+                                     minlen = 1,
+                                     maxlen = 20,
+                                     target = "frequent itemset"))
+```
+
+```{r}
+summary(itemsets)
+```
+
+```{r}
+# Se muestran los top 20 itemsets de mayor a menor soporte
+top_20_itemsets <- sort(itemsets, by = "support", decreasing = TRUE)[1:20]
+inspect(top_20_itemsets)
+```
+
+```{r}
+# Para representarlos con ggplot se convierte a dataframe 
+as(top_20_itemsets, Class = "data.frame") %>%
+  ggplot(aes(x = reorder(items, support), y = support)) +
+  geom_col() +
+  coord_flip() +
+  labs(title = "Itemsets más frecuentes", x = "itemsets") +
+  theme_bw()
+```
+
+## Reglas de asociación
+
+```{r}
+soporte <- 30 / dim(Groceries)[1]
+reglas <- apriori(data = Groceries,
+                  parameter = list(support = soporte,
+                                   confidence = 0.70,
+                                   # Se especifica que se creen reglas
+                                   target = "rules"))
+```
+
+```{r}
+summary(reglas)
+```
+
+```{r}
+inspect(sort(x = reglas, decreasing = TRUE, by = "confidence"))
+```
