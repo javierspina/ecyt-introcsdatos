@@ -30,12 +30,12 @@ numerics = [
 
 def nse_denom(df:DataFrame) -> Series:
     mapper = {
-        'AB': 'Alto',
-        'C1': 'Alto',
-        'C2': 'Medio-Alto',
-        'C3': 'Medio',
-        'D1': 'Medio-Bajo',
-        'D2': 'Bajo',
-        'E': 'Marginal'
+        'AB': '1- Alto',
+        'C1': '1- Alto',
+        'C2': '2- Medio-Alto',
+        'C3': '3- Medio',
+        'D1': '4- Medio-Bajo',
+        'D2': '5- Bajo',
+        'E': '6- Marginal'
         }
     return df['NSEcat1'].map(mapper)
