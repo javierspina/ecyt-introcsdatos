@@ -1,8 +1,12 @@
 import os
 import csv
-import pandas as pd
+from pandas import DataFrame
+from pandas import read_csv
 
-def col_names(nombre_archivo):
+import encc_mappers
+
+
+def colnames(nombre_archivo):
     with open(nombre_archivo, 'rt') as src:
         cols = csv.reader(src)
         col_list = []
@@ -10,20 +14,38 @@ def col_names(nombre_archivo):
             col_list.append(col[0])
         return col_list
 
-orig_cols = os.path.join('/Users', 'javierspina', 'Downloads', 'TP Consumo Cultural', 'orig.csv')
-pars_cols = os.path.join('/Users', 'javierspina', 'Downloads', 'TP Consumo Cultural', 'pars.csv')
+def map_colnames():
+    fname_cols = os.path.join('.', 'data_src', 'cols_encc.csv')
+    fname_pars = os.path.join('.', 'data_src', 'cols_pars.csv')
+    orig = colnames(fname_cols)
+    pars = colnames(fname_pars)
+    return dict(zip(orig, pars))
 
+def save_encc(df):
+    fname = os.path.join('.', 'data_src', 'encc_2017_parsedcols.csv')
+    df.to_csv(fname, index = False)
 
-orig = col_names(orig_cols)
-pars = col_names(pars_cols)
+def parse_encc(save_to_csv:bool = True) -> DataFrame:
+    # Lectura y limpieza
+    fname_encc = os.path.join('.', 'data_src', 'encc_2017.csv')
+    df = read_csv(fname_encc, dtype=str)
+    df = df.drop(labels=[1949, 2739])
+    df = df.rename(columns = map_colnames())
+    
+    # Guardar archivo
+    if save_to_csv:
+        save_encc(df)
 
-a = dict(zip(orig, pars))
+    return df.set_index('id')
 
-path_enc = os.path.join('/Users', 'javierspina', 'Downloads', 'TP Consumo Cultural', 'encc_2017.csv')
+def apply_mappings(save_to_csv:bool = True):
+    df = parse_encc(save_to_csv = False)
+    df = df.assign(NSEdenom = encc_mappers.nse_denom)
+    
+    # Guardar archivo
+    if save_to_csv:
+        save_encc(df)
+        
+    return df
 
-path_enc_pars = os.path.join('/Users', 'javierspina', 'Downloads', 'TP Consumo Cultural', 'encc_2017_pars.csv')
-
-enc = pd.read_csv(path_enc).rename(columns = a)
-
-
-enc.to_csv(path_enc_pars)
+encc = apply_mappings()
