@@ -23,5 +23,15 @@ frec_items_museos = {m: apriori(e, min_support = 0.1, use_colnames = True) for m
 for m, f in frec_items_museos.items():
     f.insert(0, 'Museo', m)
 
-itemsets = pd.concat([f.sort_values(by = 'support', ascending = False)[:10] for f in frec_items_museos.values()])
+itemsets_concurren = pd.concat([f.sort_values(by = 'support', ascending = False)[:10] for f in frec_items_museos.values()])
 
+nses = ['1- Alto', '2- Medio-Alto', '3- Medio', '4- Medio-Bajo', '5- Bajo']
+
+encc_nses = {nse: encc_frecs[encc_frecs['NSEdenom'] == nse][encc_mappers.frecs] for nse in nses}
+
+frec_items_nses = {m: apriori(e, min_support = 0.1, use_colnames = True) for m, e in encc_nses.items()}
+
+for m, f in frec_items_nses.items():
+    f.insert(0, 'NSE', m)
+
+itemsets_por_nse = pd.concat([f.sort_values(by = 'support', ascending = False)[:10] for f in frec_items_nses.values()])

@@ -5,7 +5,7 @@ library(modelr)
 
 
 # Cargar Dataset
-encuesta <- read.csv('~/UNSAM/introduccion_ciencia_datos/Repo/ecyt-introcsdatos/tp_consumo_cultural/data_src/encc_2017_parsedcols.csv')
+encuesta <- read.csv('~/../UNSAM/ecyt-datos/ecyt-introcsdatos/tp_consumo_cultural/data_src/encc_2017_parsedcols.csv')
 
 encuesta$cuantas_veces_concurre_museo <- as.integer(encuesta$cuantas_veces_concurre_museo)
 encuesta$gasto_museo <- as.double(encuesta$gasto_museo)
@@ -66,7 +66,7 @@ encuesta %>%
 
 
 # Variable x: cantidad de museos en la region
-museos <- read.csv('~/UNSAM/introduccion_ciencia_datos/Repo/ecyt-introcsdatos/tp_consumo_cultural/data_src/museos_region.csv')
+museos <- read.csv('~/../UNSAM/ecyt-datos/ecyt-introcsdatos/tp_consumo_cultural/data_src/museos_region.csv')
 
 glimpse(museos)
 
@@ -82,10 +82,6 @@ museos_por_reg <- museos_por_reg %>%
   left_join(hab_por_reg, by='region') %>% 
   mutate(museos_por_hab = cantidad_museos/popul*100000)
 
-write_csv(museos_por_reg, '~/UNSAM/introduccion_ciencia_datos/Repo/ecyt-introcsdatos/tp_consumo_cultural/data_src/cantidad_museos_region.csv')
-
-ggplot(museos_por_reg) +
-  geom_point(aes(x=region, y=cantidad_museos))
 
 entradas_proporcional <- encuesta %>% 
   filter(NSEdenom != '' & NSEdenom != '6- Marginal') %>% 
@@ -110,5 +106,50 @@ gridE <- entradas_proporcional %>%
 
 ggplot(entradas_proporcional)+
   geom_point(aes(x=museos_por_hab, y=entradas_por_hab, color=NSEdenom)) +
-  geom_line(aes(x=museos_por_hab, y=pred, color=NSEdenom), data=gridE) +
-  labs(title='Entradas expedidas según la cantidad de museos', subtitle = 'En cada región de Argentina, cada 100.000 habitantes', color = 'Nivel Socio Económico', x = 'Cantidad de museos por región', y = 'Cantidad de entradas expedidas')
+  geom_line(aes(x=museos_por_hab, y=pred, color=NSEdenom), data=gridE, size=1) +
+  labs(title='Entradas expedidas según la cantidad de museos', color = 'NSE', x = 'Museos por región cada 100.000 habitantes', y = 'Entradas expedidas cada 100.000 habitantes')
+
+
+museos %>% 
+  group_by(region, jurisdiccion) %>% 
+  count() %>% 
+  view()
+
+encuesta %>% 
+  filter(concurre_museo == 'SI' & pago_entrada_museo != 'NS/NC') %>% 
+  group_by(region, NSEdenom, pago_entrada_museo) %>% 
+  summarise(n = sum(pondera_dem)) %>% 
+  ungroup() %>% 
+  ggplot() +
+  geom_point(aes(x=n, y=NSEdenom, color=pago_entrada_museo))
+
+gratis <- encuesta %>% 
+  filter(concurre_museo == 'SI' & pago_entrada_museo == 'FUE GRATUITO') %>% 
+  group_by(region, NSEdenom) %>% 
+  summarise(entrada_gratuita = sum(pondera_dem))
+
+pago <- encuesta %>% 
+  filter(concurre_museo == 'SI' & pago_entrada_museo == 'TUVO QUE PAGAR ENTRADA') %>% 
+  group_by(region, NSEdenom) %>% 
+  summarise(entrada_paga = sum(pondera_dem))
+
+entradas <- left_join(gratis, pago, by=c('region', 'NSEdenom'))
+
+entradas$entrada_paga <- entradas$entrada_paga %>% replace_na(0)
+
+
+
+
+
+entradas <- encuesta %>% 
+  filter(NSEdenom != '') %>% 
+  group_by(region, NSEdenom) %>% 
+  summarise(habs = sum(pondera_dem)) %>% 
+  left_join(entradas, by=c('region', 'NSEdenom'))
+
+entradas$entrada_gratuita <- entradas$entrada_gratuita/entradas$habs*100000
+entradas$entrada_paga <- entradas$entrada_paga/entradas$habs*100000
+
+ggplot(entradas) +
+  geom_col(aes(x=NSEdenom, y=entrada_paga), size=1)
+
