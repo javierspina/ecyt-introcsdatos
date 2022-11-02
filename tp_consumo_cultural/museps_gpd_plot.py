@@ -24,26 +24,34 @@ museos_gpd = gpd.GeoDataFrame(museos, geometry=gpd.points_from_xy(museos.Longitu
 
 
 #%%
+plt.rcParams.update({'font.size': 20})
+
 fig, ax = plt.subplots(1, 1, dpi=600, figsize=(9,16))
 
-plt.axis('off')
+#plt.axis('off')
 
 ax.axis([-76, -52, -57, -20])
 
 map_df.plot(column = 'region',
             alpha = 0.5,
             edgecolor = 'black',
-            ax = ax, 
-            aspect='equal')
+            ax = ax,
+            aspect='equal',
+            legend=True,
+            legend_kwds={'loc': 'upper left',
+                         'bbox_to_anchor': (-0.2, 1)})
 
-museos_gpd.plot(ax=ax, color='red')
+museos_gpd.plot(ax=ax, color='red', alpha=0.8)
 
 axins = zoomed_inset_axes(ax, 20, loc=5)
 
-museos_gpd[museos_gpd['provincia'] == 'Ciudad Autónoma de Buenos Aires'].plot(ax=axins, color='red')
+museos_gpd[museos_gpd['provincia'] == 'Ciudad Autónoma de Buenos Aires'].plot(ax=axins, color='red', alpha=0.8)
 
 axins.set_yticks([])
 axins.set_xticks([])
+
+ax.set_yticks([])
+ax.set_xticks([])
 
 minx,miny,maxx,maxy =  map_df.query('NAM == "Ciudad Autónoma de Buenos Aires"').total_bounds
 axins.set_xlim(minx, maxx)
@@ -55,6 +63,7 @@ mark_inset(ax, axins, loc1=3, loc2=1, fc="none", ec="0.5")
 plt.setp(axins.get_xticklabels(), visible=False)
 plt.setp(axins.get_yticklabels(), visible=False)
 
-# plt.show()
-plt.savefig(os.path.join('slides', 'out', 'museos_datosabiertos.png'), dpi=600)
+ax.set(title='Ubicación de los Museos en Argentina')
 
+# plt.show()
+plt.savefig(os.path.join('slides', 'out', 'museos_datosabiertos.png'), dpi=600, transparent = True)

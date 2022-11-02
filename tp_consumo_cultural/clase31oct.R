@@ -2,10 +2,8 @@ library(tidyverse)
 library(arules)
 library(modelr)
 
-
-
 # Cargar Dataset
-encuesta <- read.csv('~/../UNSAM/ecyt-datos/ecyt-introcsdatos/tp_consumo_cultural/data_src/encc_2017_parsedcols.csv')
+encuesta <- read.csv('~/UNSAM/introduccion_ciencia_datos/Repo/ecyt-introcsdatos/tp_consumo_cultural/data_src/encc_2017_parsedcols.csv')
 
 encuesta$cuantas_veces_concurre_museo <- as.integer(encuesta$cuantas_veces_concurre_museo)
 encuesta$gasto_museo <- as.double(encuesta$gasto_museo)
@@ -66,7 +64,7 @@ encuesta %>%
 
 
 # Variable x: cantidad de museos en la region
-museos <- read.csv('~/../UNSAM/ecyt-datos/ecyt-introcsdatos/tp_consumo_cultural/data_src/museos_region.csv')
+museos <- read.csv('~/UNSAM/introduccion_ciencia_datos/Repo/ecyt-introcsdatos/tp_consumo_cultural/data_src/museos_region.csv')
 
 glimpse(museos)
 
@@ -137,10 +135,6 @@ entradas <- left_join(gratis, pago, by=c('region', 'NSEdenom'))
 
 entradas$entrada_paga <- entradas$entrada_paga %>% replace_na(0)
 
-
-
-
-
 entradas <- encuesta %>% 
   filter(NSEdenom != '') %>% 
   group_by(region, NSEdenom) %>% 
@@ -153,3 +147,10 @@ entradas$entrada_paga <- entradas$entrada_paga/entradas$habs*100000
 ggplot(entradas) +
   geom_col(aes(x=NSEdenom, y=entrada_paga), size=1)
 
+museos$año_inauguracion <- as.integer(museos$año_inauguracion)
+
+museos %>%
+  group_by(año_inauguracion, region) %>% 
+  summarise(n_museos = n()) %>% 
+  ggplot() +
+  geom_col(aes(x=region, y=n_museos))
