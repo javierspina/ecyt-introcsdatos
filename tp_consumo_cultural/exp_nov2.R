@@ -52,3 +52,4 @@ ggplot(concurrencia_edades_region) +
   geom_tile(aes(x=grupo_etario, y=region, fill=n_hab)) +
   scale_fill_gradient() +
   facet_grid(~ concurre_museo)
+

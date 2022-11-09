@@ -32,8 +32,8 @@ asist_museo_nse = pd.pivot_table(encuesta,
                                  aggfunc=np.sum)
 
 # Merge de asistencia a museos x NSE + totales NSE
-asist_museo_nse = pd.merge(left = asist_museo_nse, 
-                           right = encuesta_nse, 
+asist_museo_nse = pd.merge(left = asist_museo_nse,
+                           right = encuesta_nse,
                            on = 'NSEdenom')
 
 # Convertir el df a valores porcentuales dentro de cada NSE
@@ -51,9 +51,9 @@ asist_museo_nse_x100 = pd.concat([asist_museo_nse_x100.iloc[0:5], asist_museo_ns
 
 
 # Ploteo
-sns.set(font_scale=2, style="whitegrid")
+sns.set(font_scale=2, style='whitegrid')
 fig = plt.figure(figsize=(12, 9))
-ax = sns.barplot(x=asist_museo_nse_x100.NSEdenom, 
+ax = sns.barplot(x=asist_museo_nse_x100.NSEdenom,
                  y=asist_museo_nse_x100.asistencia,
                  hue=asist_museo_nse_x100.Año)    # iloc[:-1] para no graficar NSE marginal
 
@@ -85,14 +85,14 @@ entradas_proporcional = pd.read_csv(os.path.join('data_src', 'entradas_proporcio
 modelo_entradas_museos = pd.read_csv(os.path.join('data_src', 'modelo_entradas_por_museos.csv'))
 
 fig, ax = plt.subplots(figsize=(12, 8))
-sns.scatterplot(data = entradas_proporcional, 
+sns.scatterplot(data = entradas_proporcional,
                      x = entradas_proporcional.museos_por_hab,
                      y = entradas_proporcional.entradas_por_hab,
                      hue = entradas_proporcional.NSEdenom,
                      palette = plt.cm.Set1.colors,
                      ax=ax,
                      s=100)
-sns.lineplot(data=modelo_entradas_museos, 
+sns.lineplot(data=modelo_entradas_museos,
              x=modelo_entradas_museos.museos_por_hab,
              y=modelo_entradas_museos.pred,
              ax=ax,
@@ -102,9 +102,9 @@ sns.lineplot(data=modelo_entradas_museos,
              palette=plt.cm.Set1.colors,
              legend=False)
 
-sns.move_legend(ax, "upper left", bbox_to_anchor=(1, 1), title='NSE', frameon=True)
+sns.move_legend(ax, 'upper left', bbox_to_anchor=(1, 1), title='NSE', frameon=True)
 
-ax.set(title='Entradas expedidas según la cantidad de museos', 
+ax.set(title='Entradas expedidas según la cantidad de museos',
        xlabel = 'Museos por región cada 100.000 habitantes',
        ylabel = 'Entradas cada 100.000 habitantes')
 
@@ -112,3 +112,62 @@ modelo_entrada_museo_fname = os.path.join('slides', 'out', 'modelo_entrada_museo
 plt.tight_layout()
 
 plt.savefig(modelo_entrada_museo_fname, dpi=100, transparent=True)
+
+
+# %% Histograma de edades
+
+mapper = {'SECUNDARIA INCOMPLETA': 'SECUNDARIA INCOMPLETA',
+          'SECUNDARIA COMPLETA': 'SECUNDARIA COMPLETA',
+          'UNIVERSITARIO INCOMPLETO': 'SECUNDARIA COMPLETA',
+          'TERCIARIO INCOMPLETO': 'SECUNDARIA COMPLETA',
+          'TERCIARIO COMPLETO': 'SUPERIOR COMPLETO',
+          'PRIMARIA COMPLETA': 'SECUNDARIA INCOMPLETA',
+          'PRIMARIA INCOMPLETA': 'PRIMARIA INCOMPLETA',
+          'UNIVERSITARIO COMPLETO': 'SUPERIOR COMPLETO',
+          'POSGRADO INCOMPLETO O COMPLETO': 'SUPERIOR COMPLETO',
+          'SIN ESTUDIOS': 'PRIMARIA INCOMPLETA'}
+
+encuesta = encuesta.replace(to_replace=mapper)
+
+sns.set(font_scale=2, style="whitegrid")
+fig = plt.figure(figsize=(12, 8))
+
+ax = sns.histplot(data=encuesta,
+                  x='edad',
+                  weights='pondera_dem',
+                  bins=30,
+                  hue='concurre_museo',
+                  kde=True)
+
+ax.set(title='Histograma de edades',
+       xlabel = 'Edad',
+       ylabel = 'Cantidad de habitantes')
+
+plt.legend(title='Asistió a museo', loc='upper right', labels=['No', 'Si'])
+
+modelo_entrada_museo_fname = os.path.join('slides', 'out', 'histo_edades_concurrencia.png')
+
+plt.savefig(modelo_entrada_museo_fname, dpi=100, transparent=True)
+
+
+# %%
+
+sns.set(font_scale=2, style="whitegrid")
+fig = plt.figure(figsize=(12, 8))
+
+ax = sns.histplot(data=encuesta,
+                  x='edad',
+                  weights='pondera_dem',
+                  bins=30,
+                  y='nivel_estudios',
+                  hue='concurre_museo')
+
+#ax.set(title='Histograma de edades',
+#       xlabel = 'Edad',
+#       ylabel = 'Cantidad de habitantes')
+
+#plt.legend(title='Asistió a museo', loc='upper right', labels=['No', 'Si'])
+
+#modelo_entrada_museo_fname = os.path.join('slides', 'out', 'histo_edades_concurrencia.png')
+
+#plt.savefig(modelo_entrada_museo_fname, dpi=100, transparent=True)

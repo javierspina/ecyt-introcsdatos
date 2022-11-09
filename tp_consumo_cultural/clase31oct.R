@@ -3,7 +3,9 @@ library(arules)
 library(modelr)
 
 # Cargar Dataset
-encuesta <- read.csv('~/UNSAM/introduccion_ciencia_datos/Repo/ecyt-introcsdatos/tp_consumo_cultural/data_src/encc_2017_parsedcols.csv')
+encuesta <- read.csv('C:\\Users\\Javier\\UNSAM\\ecyt-datos\\ecyt-introcsdatos\\tp_consumo_cultural\\data_src\\encc_2017_parsedcols.csv')
+
+options(scipen=999)
 
 encuesta$cuantas_veces_concurre_museo <- as.integer(encuesta$cuantas_veces_concurre_museo)
 encuesta$gasto_museo <- as.double(encuesta$gasto_museo)
@@ -64,7 +66,7 @@ encuesta %>%
 
 
 # Variable x: cantidad de museos en la region
-museos <- read.csv('~/UNSAM/introduccion_ciencia_datos/Repo/ecyt-introcsdatos/tp_consumo_cultural/data_src/museos_region.csv')
+museos <- read.csv('C:\\Users\\Javier\\UNSAM\\ecyt-datos\\ecyt-introcsdatos\\tp_consumo_cultural\\data_src\\museos_region.csv')
 
 glimpse(museos)
 
@@ -154,3 +156,48 @@ museos %>%
   summarise(n_museos = n()) %>% 
   ggplot() +
   geom_col(aes(x=region, y=n_museos))
+
+encuesta %>% 
+  group_by(region, concurre_museo) %>% 
+  summarise(Encuestados = n(), Ponderación = sum(pondera_dem)/10000) %>% 
+  melt(id.vars = c('region', 'concurre_museo')) %>% 
+  ggplot() +
+  geom_col(aes(x=region, y=value, fill=variable), position='dodge') +
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = "Encuestados",
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*10000, name="Habitantes ponderados")
+  ) +
+  theme_minimal() +
+  theme(legend.position='top', text = element_text(size = 20))+
+  labs(title='Magnitud de la ponderación',
+       subtitle='Cantidad de encuestados vs ponderación',
+       x='Regiones encuestadas', 
+       y='Personas',
+       fill = '')
+
+itemsets <- read.csv('C:\\Users\\Javier\\UNSAM\\ecyt-datos\\ecyt-introcsdatos\\tp_consumo_cultural\\itemsets.csv')
+itemsets_no_concurren <- read.csv('C:\\Users\\Javier\\UNSAM\\ecyt-datos\\ecyt-introcsdatos\\tp_consumo_cultural\\itemsets_no_concurrents.csv')
+
+itemsets['concurre_museo'] <-  'SI'
+itemsets_no_concurren['concurre_museo'] <-  'NO'
+
+ggplot(itemsets) +
+  geom_tile(aes(x=NSE, y=itemsets, fill=support))
+
+ggplot(itemsets_no_concurren) +
+  geom_tile(aes(x=NSE, y=itemsets, fill=support))
+
+prefs <- rbind(itemsets, itemsets_no_concurren)
+
+ggplot(prefs) +
+  geom_col(aes(y=itemsets, x=support, fill=concurre_museo), position='dodge') +
+  facet_grid(~NSE) +
+  labs(title = 'Preferencias sobre otros consumos culturales',
+       subtitle='Usando algoritmo Apriori',
+       x='Soporte',
+       y='',
+       fill='Asistió a museo')

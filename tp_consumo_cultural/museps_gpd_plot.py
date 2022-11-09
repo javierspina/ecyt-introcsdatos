@@ -26,9 +26,8 @@ museos_gpd = gpd.GeoDataFrame(museos, geometry=gpd.points_from_xy(museos.Longitu
 #%%
 plt.rcParams.update({'font.size': 20})
 
-fig, ax = plt.subplots(1, 1, dpi=600, figsize=(9,16))
-
-#plt.axis('off')
+fig, ax = plt.subplots(1, 1, dpi=300, figsize=(9,16))
+plt.axis('off')
 
 ax.axis([-76, -52, -57, -20])
 
@@ -66,4 +65,4 @@ plt.setp(axins.get_yticklabels(), visible=False)
 ax.set(title='Ubicación de los Museos en Argentina')
 
 # plt.show()
-plt.savefig(os.path.join('slides', 'out', 'museos_datosabiertos.png'), dpi=600, transparent = True)
+plt.savefig(os.path.join('slides', 'out', 'museos_datosabiertos.png'), dpi=300, transparent = True)
