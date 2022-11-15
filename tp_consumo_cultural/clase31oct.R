@@ -201,3 +201,52 @@ ggplot(prefs) +
        x='Soporte',
        y='',
        fill='Asistió a museo')
+
+encuesta_estudios_simple <- read.csv('C:\\Users\\Javier\\UNSAM\\ecyt-datos\\ecyt-introcsdatos\\tp_consumo_cultural\\data_src\\encuesta_estudios_simple.csv')
+
+encuesta_estudios_simple %>% 
+  ggplot() +
+  geom_jitter(aes(x=edad, y=nivel_estudios, size=pondera_dem, color=concurre_museo)) +
+  facet_wrap(~ concurre_museo) +
+  labs(color = 'Asistió a museo', size= 'Ponderador', x='Edad', y='Nivel de Estudios', title='Asistencia a museos según nivel de estudios')
+
+encuesta_estudios_simple %>% 
+  filter(NSEdenom != '' & NSEdenom != '6- Marginal') %>% 
+  ggplot() +
+  geom_jitter(aes(x=edad, y=situacion_psh, size=pondera_dem, color=concurre_museo)) +
+  facet_wrap(~ NSEdenom) +
+  labs(color = 'Asistió a museo', size= 'Ponderador', x='Edad', y='Situación laboral', title='Asistencia a museos según situación laboral', subtitle='del Principal Sostén del Hogar')
+
+encuesta_estudios_simple %>% 
+  group_by(edad) %>% 
+  summarise(horas_digitales = mean((horas_internet_total+horas_videojuegos_total)*pondera_dem)/100000) %>% 
+  ggplot() +
+  geom_point(aes(x=edad, y=horas_digitales))+
+  geom_smooth(aes(x=edad, y=horas_digitales)) +
+  theme_minimal() +
+  labs(title='Consumos digitales según edad', x='Edad', y='Horas promedio cada 100.000 habitantes')
+
+encuesta %>% 
+  group_by(NSEdenom) %>% 
+  summarise(max_puntaje = max(NSEpuntaje),
+            min_puntaje = min(NSEpuntaje))
+
+
+encuesta$cuantas_veces_concurre_museo <- as.integer(encuesta$cuantas_veces_concurre_museo)
+
+encuesta %>% 
+  filter(NSEdenom != '' & NSEdenom != '6- Marginal') %>% 
+  group_by(NSEpuntaje) %>% 
+  summarise(n_entradas = sum(cuantas_veces_concurre_museo * pondera_dem, na.rm = T),
+            n_hab = sum(pondera_dem),
+            proporcion_entradas = n_entradas/n_hab) %>% 
+  ggplot() +
+  geom_point(aes(x=NSEpuntaje, y=n_entradas, color=proporcion_entradas, size=n_hab)) +
+  scale_color_gradient(low = "red", high = "green") +
+  labs(title='Cantidad de entradas expedidas según NSE',
+       x='Puntaje NSE',
+       y='Cantidad de Entradas',
+       color='Proporción entradas',
+       size='Cantidad de Habitantes') +
+  theme_minimal()
+  

@@ -2,14 +2,12 @@
 
 % Paquetes
 \usepackage[T1]{fontenc}    % Para escribir en español
-\usepackage[spanish]{babel}
+\usepackage[spanish]{babel}    % Para escribir en español
 \usepackage{hyperref}    % Para hacer links a la web
 \usepackage{listings}    % Para incluir código
 
 % Setup imagenes
 \graphicspath{ {out/}}
-
-\setlength{\abovecaptionskip}{-1pt plus 0pt minus 0pt}
 
 % Estilos
 \usetheme{Madrid}
@@ -19,11 +17,11 @@
 \setbeamertemplate{footline}{%
   \leavevmode%
 
-  \hbox{\begin{beamercolorbox}[wd=.5\paperwidth, center, ht=2.25ex]{author in head/foot}%
+  \hbox{\begin{beamercolorbox}[wd=.5\paperwidth, center, ht=2.5ex]{author in head/foot}%
     \usebeamerfont{author in head/foot}\insertshortauthor%
   \end{beamercolorbox}%
 
-  \begin{beamercolorbox}[wd=.4\paperwidth, center, ht=2.25ex]{title in head/foot}%
+  \begin{beamercolorbox}[wd=.4\paperwidth, center, ht=2.5ex]{title in head/foot}%
     \usebeamerfont{title in head/foot}\insertshorttitle%
   \end{beamercolorbox}%
 
@@ -38,9 +36,6 @@
 % Eliminar barra de navegación
 \beamertemplatenavigationsymbolsempty
 
-% CAptions
-\usepackage[font=footnotesize,labelfont=bf]{caption}
-\setbeamertemplate{caption}[numbered]
 
 % Info para la title page
 \title{Concurrencia a Museos de Argentina}
@@ -60,220 +55,236 @@
 % Inicio del documento
 \begin{document}
 
+
 \frame{\titlepage}
+
 
 % Pregunta y contexto
 \begin{frame}
-\frametitle{La pregunta y su contexto}
+  \frametitle{La pregunta y su contexto}
 
-\begin{block}{La pregunta}
-¿Cómo aumentar la concurrencia a los museos?
-\end{block}
+  \begin{block}{La pregunta}
+    ¿Cómo aumentar la concurrencia a los museos?
+  \end{block}
 
-\begin{figure}
-\centering
-\includegraphics[height=0.6\textheight]{asist_museo_nse_x100}
-\label{fig:asist_museo_nse}
-\caption{Asistencia a museos 2013-2017}
-\end{figure}
+  \vfill
 
+  \begin{center}
+    \includegraphics[height=0.6\textheight]{asist_museo_nse_x100}
+  \end{center}
 \end{frame}
+
 
 % Presentación
 \begin{frame}
-\frametitle{Presentación del \textit{dataset}}
+  \frametitle{Presentación del \textit{dataset}}
 
-\begin{columns}
-\column{0.5\textwidth}
-\begin{figure}
-\centering
-\includegraphics[height=0.7\textheight]{encc_informe_portada.pdf}
-\label{fig:portada_encc}
-\end{figure}
+  \begin{columns}
+    \column{0.5\textwidth}
+      \begin{center}
+        \includegraphics[height=0.7\textheight]{encc_informe_portada.pdf}
+      \end{center}
 
-\column{0.5\textwidth}
-\begin{itemize}
-\item Se trabajó con el \textit{dataset} asociado a la \textbf{Encuesta Nacional de Consumos Culturales} realizada en 2017. 
-\item Se complementó con datos abiertos de los Museos de Argentina y un Shapefile de Argentina de las 23 provincias y CABA.
-\end{itemize}
-\end{columns}
-
+    \column{0.5\textwidth}
+      \begin{itemize}
+        \item Se trabajó con el \textit{dataset} asociado a la \textbf{Encuesta Nacional de Consumos Culturales} realizada en 2017. 
+        \item Se complementó con datos abiertos de los Museos de Argentina y un Shapefile de Argentina de las 23 provincias y CABA.
+      \end{itemize}
+  \end{columns}
 \end{frame}
 
+
+% Limpieza de datos
 \begin{frame}
   \frametitle{Trabajo inicial: unidades y variables}
+
   \begin{columns}
     \column{0.2\textwidth}
       Encuesta\\
       2802 unidades\\
       450 variables
+
     \column{0.5\textwidth}
-      \begin{figure}
-        \includegraphics[width=\textwidth]{pondera}
-        \label{fig:pondera}
-        \caption{Importancia de la ponderación}
-      \end{figure}
+      \includegraphics[width=\textwidth]{pondera}
+
     \column{0.3\textwidth}
-      \begin{figure}
-        \includegraphics[width=0.8\textwidth]{tipos_variables}
-        \label{fig:tipos_variables}
-        \caption{Tipos de variables}
-      \end{figure}
+      \includegraphics[width=0.8\textwidth]{tipos_variables}
   \end{columns}
 
   \vfill
 
   \begin{columns}
-    % \column{0.5\textwidth}
-    % \begin{figure}
-    %   \vspace{-2em}
-    % \includegraphics[width=0.9\textwidth]{histo_edades_concurrencia.png}
-    % \label{fig:histo_edades}
-    % \end{figure}
     \column{0.2\textwidth}
-    Museos\\
-    1182 unidades\\
-    27 variables
+      Museos\\
+      1182 unidades\\
+      27 variables
 
     \column{0.3\textwidth}
-    \resizebox{\textwidth}{!}{%
-      \begin{tabular}{ |l|c| }
-        \hline
-        Localizacion & Unidades\\ \hline
-        Precisa & 1179 \\ \hline
-        Centroide de la localidad & 1 \\ \hline
-        Centroide por proximidad & 2\\ \hline
-      \end{tabular}}
+      \resizebox{\textwidth}{!}{%
+        \begin{tabular}{|l|c|}
+          \hline
+          Localizacion & Unidades\\ \hline
+          Precisa & 1179 \\ \hline
+          Centroide de la localidad & 1 \\ \hline
+          Centroide por proximidad & 2\\ \hline
+        \end{tabular}
+      }
+
       \column{0.45\textwidth}
-      \begin{itemize}
-        \item Se agregó la columna región en el \emph{dataset} de la ubicación de los museos.
-        \item Se limitó el Shapefile de Argentina a la vista continental.
-      \end{itemize}
+        \begin{itemize}
+          \item Se agregó la columna región en el \emph{dataset} de la ubicación de los museos.
+          \item Se limitó el Shapefile de Argentina a la vista continental.
+        \end{itemize}
   \end{columns}
-
 \end{frame}
 
+
+% Hipótesis
 \begin{frame}
-\frametitle{Análisis Exploratorio}
+  \frametitle{Hipótesis de trabajo}
+  Se trabajó alrededor de dos hipótesis para aumentar la concurrencia.
 
-\begin{columns}
-\column{0.5\textwidth}
-\begin{figure}
-\vspace{-2.75em}
-\includegraphics[width=\textwidth]{museos_datosabiertos.png}
-\label{fig:museos}
-\caption{Argentina y sus museos}
-\end{figure}
-\column{0.5\textwidth}
-\begin{figure}
+  \begin{block}{Hipótesis 1}
+    Instalar nuevos museos aumentará la concurrencia a los mismos.
+  \end{block}
 
-  \vspace{-1.5em}
-  \includegraphics[width=0.9\textwidth]{cantidad_museos.png}
-  \label{fig:cant_museos}
-  \caption{Cantidad de museos por región}
-\end{figure}
-  \begin{figure}
-    \vspace{-2.25em}
-    \includegraphics[width=0.9\textwidth]{entradas.png}
-    \label{fig:tipos_entradas}
-    \caption{Influencia de la gratuidad de la entrada}
-    \end{figure}
-\end{columns}
-
+  \begin{block}{Hipótesis 2}
+    Hacer más atractivas las propuestas de los museos en base a los otros consumos culturales aumentará la concurrencia.
+  \end{block}
 \end{frame}
 
+
+% Análisis 1
 \begin{frame}
   \frametitle{Análisis Exploratorio}
-  \begin{figure}
-    \includegraphics[width=\textwidth]{consumos_digitales.png}
-    \label{fig:digitales}
-    \caption{Consumos digitales según edad}
-    \end{figure}
+
+  \begin{columns}
+    \column{0.5\textwidth}
+      \begin{figure}
+        \vspace{-2.75em}
+        \includegraphics[width=\textwidth]{museos_datosabiertos.png}
+      \end{figure}
+    
+    \column{0.5\textwidth}
+      \begin{figure}
+        \vspace{-1.5em}
+        \includegraphics[width=0.9\textwidth]{cantidad_museos.png}
+      \end{figure}
+
+      \begin{figure}
+        \vspace{-2.25em}
+        \includegraphics[width=0.9\textwidth]{entradas.png}
+      \end{figure}
+  \end{columns}
 \end{frame}
 
+
+% Cantidad de entradas
 \begin{frame}
-  \frametitle{Análisis Específico}
-  \begin{figure}
+  \frametitle{Visitas a los museos}
+
+    \includegraphics[width=0.9\textwidth]{entradas_nse}
+\end{frame}
+
+
+% Preferencias de museos
+\begin{frame}
+  \frametitle{Los tipos de museos más concurridos}
+
     \includegraphics[width=0.95\textwidth]{visitas.jpg}
-    \label{fig:visitas}
-    \caption{Visitas a museos}
-    \end{figure}
-  \end{frame}
+    Con los datos que se tienen, no es posible saber cuántos museos de cada temática hay en el país.
+\end{frame}
 
-  \begin{frame}
-    \frametitle{Análisis Específico}
 
-  
-    \begin{figure}
-      \includegraphics[width=\textwidth]{itemsets.png}
-      \label{fig:itemsets}
-      \caption{Relación entre otros consumos culturales}
-      \end{figure}
-    \end{frame}
+% Segmentaciones de consumos culturales y concurrencia a los museos
+\begin{frame}
+  \frametitle{Comparación de segmentos de consumo cultural}
 
-    \begin{frame}
-      \frametitle{Análisis Específico}
-      \begin{figure}
-        \includegraphics[width=0.95\textwidth]{nivel_estudios.png}
-        \label{fig:nivel_estudios}
-        \caption{Visitas a museos y escolaridad}
-        \end{figure}
-      \end{frame}
-    
-      \begin{frame}
-        \frametitle{Análisis Específico}
-    
-      
-        \begin{figure}
-          \includegraphics[width=\textwidth]{situacion_psh.png}
-          \label{fig:situacion_psh}
-          \caption{Visitas a museos y empleo}
-          \end{figure}
-        \end{frame}
+    \includegraphics[width=\textwidth]{itemsets.png}
+\end{frame}
+
+
+% Consumos digitales
+\begin{frame}
+  \frametitle{Cultura digital}
+    \includegraphics[width=\textwidth]{consumos_digitales.png}
+\end{frame}
+
+
+% Situación PSH
+\begin{frame}
+  \frametitle{Visitas a museos y situación laboral}
+%    \includegraphics[width=\textwidth]{situacion_psh.png}
+    \includegraphics[height=0.32\textheight]{dist_asistentes_lab.png}
+    \vfill
+    \includegraphics[height=0.32\textheight]{dist_no_asistentes_lab.png}
+\end{frame}
+
+
+% Nivel de estudios
+\begin{frame}
+  \frametitle{Visitas a museos y escolaridad}
+
+    \begin{columns}
+      \column{0.75\textwidth}
+        \includegraphics[width=\textwidth]{dist_asistentes.png}
+        \vfill
+        \includegraphics[width=\textwidth]{dist_no_asistentes.png}
+
+      \column{0.25\textwidth}
+        \includegraphics[width=\textwidth]{edad_escolar.png}
+    \end{columns}
+
+\end{frame}
+
 
 % Cantidad de museos y entradas
 \begin{frame}
-\frametitle{Modelado}
+  \frametitle{Modelo de concurrencia al museo}
+  \begin{columns}
+    \column{0.75\textwidth}
+    \includegraphics[height=0.9\textheight]{modelo_entrada_museo}
+    Multiple R-squared: 0.7544, Adjusted R-squared: 0.6659
 
-\begin{figure}
-\centering
-\includegraphics[width=0.9\textwidth]{modelo_entrada_museo}
-\label{fig:modelo_entrada_museo}
-\caption{Modelo. Multiple R-squared: 0.7544, Adjusted R-squared: 0.6659 }
-\end{figure}
+    \column{0.25\textwidth}
+    \includegraphics[width=0.9\textwidth]{rectas.png}
+  \end{columns}
+
 
 \end{frame}
 
+
+% Conclusiones
 \begin{frame}
-  \frametitle{Conclusiones}
-  \begin{itemize}
-    \item El contexto socio-económico es muy influyente en la concurrencia a museos.
-    \item La encuesta podría indagar en las razones de no concurrencia a museos.
-    \item Hay una oportunidad de incrementar la concurrencia con las visitas a museos.
-    \item Los consumos culturales tienden a ser más digitales. Los museos pueden tomar la iniciativa.
-  \end{itemize}
-% - Contexto muy influyente en las NSE más bajas para consumos culturales "costosos" (en dinero y tiempo) [habría que tener gàfico anterior de situaciones laborales vs concurrencia]\\
-% - Encuesta podría indagar por razones específicas de no-concurrencia a museos\\
-% - Oportunidad de incrementar concurrencia concretamente en visitas de las escuelas [gráfico anterior de no-asistencia respecto de edad y nivel de estudios]\\
-% - Tendencia no se revertiría por cantidad de museos, la gente de NSE más bajas no se acerca a los museos aún si hay mayor cantidad. Los museos pueden acercarse a la gente (nuevos tipos de museos: interactivos?) [gráfico de uso de redes sociales]
+  \frametitle{Conclusiones y trabajo a futuro}
+    \begin{itemize}
+      \item El contexto socio-económico es muy influyente en la concurrencia a museos.
+      \item La encuesta podría indagar en las razones de no concurrencia a museos.
+      \item Hay una oportunidad de incrementar la concurrencia con las visitas a museos en edad escolar.
+      \item Los consumos culturales tienden a ser más digitales. Los museos pueden tomar la iniciativa.
+    \end{itemize}
 \end{frame}
 
+
+% Final
 {
-\usebackgroundtemplate{
-  \includegraphics[width=1.2\paperwidth]{mnba-frente.jpg}}%
-\begin{frame}
-  \frametitle{¡Gracias!}
-\vspace{15em}
-  \begin{alertblock}{Vayan a los museos}
-  ¡Gracias por su atención!\\
-  ¿Alguna pregunta?
-  \end{alertblock}
+  \usebackgroundtemplate{
+    \includegraphics[width=1.2\paperwidth]{mnba-frente.jpg}
+  }
+  \begin{frame}
+    \frametitle{¡Gracias!}
+
+    \vspace{15em}
+
+    \begin{alertblock}{Vayan a los museos}
+      ¡Gracias por su atención!\\
+      ¿Alguna pregunta?
+    \end{alertblock}
   \end{frame}
-\end{frame}
 }
 
 
-
+% Fuentes
 \begin{frame}
   \frametitle{Fuentes}
   \begin{itemize}
@@ -284,7 +295,7 @@
   
 \end{frame}
 
-
+% Slide oculta, datos del modelo
 \begin{frame}
   \frametitle{Valores del modelo}
 \begin{block}{Modelo lineal}

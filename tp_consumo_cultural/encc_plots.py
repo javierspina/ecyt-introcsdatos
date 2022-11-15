@@ -129,31 +129,53 @@ mapper = {'SECUNDARIA INCOMPLETA': 'SECUNDARIA INCOMPLETA',
 
 encuesta = encuesta.replace(to_replace=mapper)
 
+encuesta.to_csv('data_src/encuesta_estudios_simple.csv')
+#%%
 sns.set(font_scale=2, style="whitegrid")
-fig = plt.figure(figsize=(12, 8))
+fig = plt.figure(figsize=(17, 6), dpi=300)
 
-ax = sns.histplot(data=encuesta,
+ax = sns.histplot(data=encuesta[encuesta['concurre_museo'] == 'NO'],
                   x='edad',
                   weights='pondera_dem',
-                  bins=30,
-                  hue='concurre_museo',
-                  kde=True)
+                  bins=15,
+                  hue='nivel_estudios',
+                  kde=True,
+                  multiple='dodge')
 
-ax.set(title='Histograma de edades',
+ax.set(title='No asistencia al museo según edad y nivel de estudios',
        xlabel = 'Edad',
-       ylabel = 'Cantidad de habitantes')
+       ylabel = 'Habitantes [Millones]')
 
-plt.legend(title='Asistió a museo', loc='upper right', labels=['No', 'Si'])
+sns.move_legend(ax, "upper left", bbox_to_anchor=(0.75, 1))
 
-modelo_entrada_museo_fname = os.path.join('slides', 'out', 'histo_edades_concurrencia.png')
+plt.tight_layout()
+plt.savefig('slides/out/dist_no_asistentes.png', dpi=300, transparent=True)
 
-plt.savefig(modelo_entrada_museo_fname, dpi=100, transparent=True)
+#%%
+sns.set(font_scale=2, style="whitegrid")
+fig = plt.figure(figsize=(17, 6), dpi=300)
 
+ax = sns.histplot(data=encuesta[encuesta['concurre_museo'] == 'SI'],
+                  x='edad',
+                  weights='pondera_dem',
+                  bins=15,
+                  hue='nivel_estudios',
+                  kde=True,
+                  multiple='dodge')
+
+ax.set(title='Asistencia al museo según edad y nivel de estudios',
+       xlabel = 'Edad',
+       ylabel = 'Habitantes')
+
+sns.move_legend(ax, "upper left", bbox_to_anchor=(0.75, 1))
+
+plt.tight_layout()
+plt.savefig('slides/out/dist_asistentes.png', dpi=300, transparent=True)
 
 # %%
 
 sns.set(font_scale=2, style="whitegrid")
-fig = plt.figure(figsize=(12, 8))
+fig = plt.figure(dpi=300, figsize=(12, 8))
 
 ax = sns.histplot(data=encuesta,
                   x='edad',
@@ -171,3 +193,113 @@ ax = sns.histplot(data=encuesta,
 #modelo_entrada_museo_fname = os.path.join('slides', 'out', 'histo_edades_concurrencia.png')
 
 #plt.savefig(modelo_entrada_museo_fname, dpi=100, transparent=True)
+
+
+# %%
+
+encuesta_simple = pd.read_csv('data_src/encuesta_simple.csv')
+
+encuesta_simple = encuesta_simple[encuesta_simple['NSEdenom'] != '6- Marginal']
+
+sns.set(font_scale=2, style="whitegrid")
+fig = plt.figure(figsize=(20, 5), dpi=300)
+
+ax = sns.histplot(data=encuesta_simple[encuesta_simple['concurre_museo'] == 'NO'],
+                  x='NSEpuntaje',
+                  weights='pondera_dem',
+                  bins=30,
+                  hue='situacion_psh',
+                  kde=True,
+                  multiple='layer')
+
+plt.axvline(38, 0, 2, color='black')
+plt.axvline(52, 0, 2, color='black')
+plt.axvline(69, 0, 2, color='black')
+plt.axvline(84, 0, 2, color='black')
+
+
+ax.set(title='No asistencia al museo según NSE y situación laboral',
+       xlabel = 'Puntaje NSE',
+       ylabel = 'Habitantes [Millones]')
+
+sns.move_legend(ax, "upper left", bbox_to_anchor=(0, 1.05))
+
+plt.tight_layout()
+plt.savefig('slides/out/dist_no_asistentes_lab.png', dpi=300, transparent=True)
+
+#%%
+
+encuesta_simple = encuesta_simple[encuesta_simple['NSEdenom'] != '6- Marginal']
+
+sns.set(font_scale=2, style="whitegrid")
+fig = plt.figure(figsize=(20, 5), dpi=300)
+
+ax = sns.histplot(data=encuesta_simple[encuesta_simple['concurre_museo'] == 'SI'],
+                  x='NSEpuntaje',
+                  weights='pondera_dem',
+                  bins=30,
+                  hue='situacion_psh',
+                  kde=True,
+                  multiple='layer')
+
+plt.axvline(38, 0, 2, color='black')
+plt.axvline(52, 0, 2, color='black')
+plt.axvline(69, 0, 2, color='black')
+plt.axvline(84, 0, 2, color='black')
+
+
+ax.set(title='Asistencia al museo según NSE y situación laboral',
+       xlabel = 'Puntaje NSE',
+       ylabel = 'Habitantes')
+
+sns.move_legend(ax, "upper left", bbox_to_anchor=(0, 1.05))
+
+plt.tight_layout()
+plt.savefig('slides/out/dist_asistentes_lab.png', dpi=300, transparent=True)
+
+# %%
+
+edad_escolar = encuesta_simple[encuesta_simple['edad'] < 18][encuesta_simple['nivel_estudios'] == 'SECUNDARIA INCOMPLETA']
+
+sns.set(font_scale=2, style="whitegrid")
+fig = plt.figure(figsize=(6, 10), dpi=300)
+
+ax = sns.histplot(data=edad_escolar,
+                  x='edad',
+                  weights='pondera_dem',
+                  bins=5,
+                  hue='concurre_museo',
+                  multiple='fill')
+
+ax.set(title='Asistencia al museo en edad escolar',
+       xlabel = 'Edad',
+       ylabel = 'Proporción')
+
+ax.set_yticks([0.15, 0.5])
+
+plt.tight_layout()
+plt.savefig('slides/out/edad_escolar.png', dpi=300, transparent=True)
+
+
+# %%
+
+edad_escolar = encuesta_simple[encuesta_simple['edad'] < 18][encuesta_simple['nivel_estudios'] == 'SECUNDARIA INCOMPLETA']
+
+sns.set(font_scale=2, style="whitegrid")
+fig = plt.figure(figsize=(6, 10), dpi=300)
+
+ax = sns.histplot(data=edad_escolar,
+                  x='edad',
+                  weights='pondera_dem',
+                  bins=5,
+                  hue='concurre_museo',
+                  multiple='fill')
+
+ax.set(title='Asistencia al museo en edad escolar',
+       xlabel = 'Edad',
+       ylabel = 'Proporción')
+
+ax.set_yticks([0.15, 0.5])
+
+plt.tight_layout()
+plt.savefig('slides/out/edad_escolar.png', dpi=300, transparent=True)
